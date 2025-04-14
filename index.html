@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Weather App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Pixelify+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="stars"></div>
+      <div class="dynamic-bg" id="dynamic-bg"></div>
+      <div class="search-container">
+        <input
+          type="text"
+          id="city-search"
+          placeholder="Enter city name..."
+          class="pixel-input"
+        />
+        <button id="search-btn" class="pixel-button">SEARCH</button>
+      </div>
+
+      <main class="weather-app">
+        <section class="city-view">
+          <div class="pixel-clouds" id="weather-scene"></div>
+          <div class="city-info">
+            <div class="location-display">
+              <span class="pixel-icon">📍</span>
+              <span id="city-name">Loading...</span>
+            </div>
+            <div class="time-display" id="current-time">00:00</div>
+          </div>
+          <div class="city-skyline"></div>
+          <div class="location-badge">
+            <div class="badge-icon">🌡️</div>
+            <div class="badge-text" id="current-temp">--°C</div>
+          </div>
+        </section>
+
+        <section class="weather-details">
+          <div class="current-weather">
+            <div class="weather-icon">
+              <div id="current-icon" class="weather-icon-display"></div>
+            </div>
+            <div class="city-temp">
+              <h1 id="weather-description">Loading...</h1>
+            </div>
+          </div>
+
+          <h2 class="section-title">5-DAY FORECAST</h2>
+          <div class="forecast-container" id="forecast-container">
+            <div class="loading-text">Loading forecast data...</div>
+          </div>
+
+          <h2 class="section-title">WEATHER METRICS</h2>
+          <div class="weather-metrics">
+            <div class="metric-item">
+              <div class="metric-icon sun-rays"></div>
+              <div class="metric-label">UV INDEX</div>
+              <div class="metric-value" id="uv-index">--</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-icon humidity"></div>
+              <div class="metric-label">HUMIDITY</div>
+              <div class="metric-value" id="humidity">--%</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-icon wind"></div>
+              <div class="metric-label">WIND</div>
+              <div class="metric-value" id="wind-speed">-- km/h</div>
+            </div>
+          </div>
+
+          <div class="additional-metrics">
+            <div class="metric-row">
+              <div class="metric-col">
+                <div class="metric-label">SUNRISE</div>
+                <div class="metric-value" id="sunrise">--:--</div>
+              </div>
+              <div class="metric-col">
+                <div class="metric-label">SUNSET</div>
+                <div class="metric-value" id="sunset">--:--</div>
+              </div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-col">
+                <div class="metric-label">FEELS LIKE</div>
+                <div class="metric-value" id="feels-like">--°C</div>
+              </div>
+              <div class="metric-col">
+                <div class="metric-label">AIR QUALITY</div>
+                <div class="metric-value" id="air-quality">--</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <section class="hourly-forecast-container">
+        <h2 class="section-title">HOURLY FORECAST</h2>
+        <div class="hourly-forecast" id="hourly-forecast">
+          <div class="loading-text">Loading hourly data...</div>
+        </div>
+      </section>
+
+      <div class="icon-legend">
+        <h3>Weather Icons:</h3>
+        <div class="legend-item">
+          <div class="icon-sun"></div>
+          <span>Sunny (Day)</span>
+        </div>
+        <div class="legend-item">
+          <div class="icon-moon"></div>
+          <span>Clear (Night)</span>
+        </div>
+        <div class="legend-item">
+          <div class="icon-partly-cloudy-day"></div>
+          <span>Partly Cloudy (Day)</span>
+        </div>
+        <div class="legend-item">
+          <div class="icon-partly-cloudy-night"></div>
+          <span>Partly Cloudy (Night)</span>
+        </div>
+        <div class="legend-item">
+          <div class="icon-cloud"></div>
+          <span>Cloudy</span>
+        </div>
+        <div class="legend-item">
+          <div class="icon-rain"></div>
+          <span>Rain</span>
+        </div>
+        <div class="legend-item">
+          <div class="icon-snow"></div>
+          <span>Snow</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

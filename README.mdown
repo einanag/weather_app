@@ -1,0 +1,19 @@
+# Pixel Weather App 🌦️
+
+➡️ **Ckick to try it out:** [https://yourusername.github.io/pixel-weather-app](https://yourusername.github.io/pixel-weather-app)
+
+<img src="demo.png" width="400" alt="App screenshot showing weather forecast">
+
+
+## Features
+- Real-time weather data
+- 5-day forecast
+- Hourly forecast
+- Animated weather scenes
+- Pixel art design
+- Responsive layout
+
+## Technical Implementation 
+
+- **Frontend**:  HTML/CSS/JS
+- **API**: WeatherAPI.com (RESTful JSON responses)
