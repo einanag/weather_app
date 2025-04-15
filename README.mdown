@@ -1,6 +1,5 @@
 # Pixel Weather App 🌦️
 
-➡️ <a href="https://einanag.github.io/weather_app/" target="_blank">**Click to try it out**</a>
 
 
 <img src="assets/demo.png" width="600">
