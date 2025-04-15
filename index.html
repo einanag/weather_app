@@ -2,7 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#4a2b4d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <title>Pixel Weather App</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,10 +31,14 @@
           id="city-search"
           placeholder="Enter city name..."
           class="pixel-input"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="words"
         />
         <button id="search-btn" class="pixel-button">SEARCH</button>
       </div>
 
+      <!-- Rest of the HTML remains unchanged -->
       <main class="weather-app">
         <section class="city-view">
           <div class="pixel-clouds" id="weather-scene"></div>

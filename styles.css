@@ -895,3 +895,150 @@ body {
   flex-direction: column;
   gap: 15px;
 }
+
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .app-container {
+    max-width: 100%;
+  }
+
+  .search-container {
+    flex-direction: column;
+  }
+
+  .pixel-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .weather-app {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .city-view {
+    height: 300px;
+  }
+
+  .weather-metrics {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .metric-item:last-child {
+    grid-column: span 2;
+    width: 50%;
+    margin: 0 auto;
+  }
+
+  .hourly-forecast {
+    padding: 10px;
+  }
+
+  .hour-item {
+    min-width: 70px;
+    padding: 8px;
+  }
+
+  .icon-legend {
+    width: 100%;
+    margin: 20px 0;
+    max-width: none;
+  }
+
+  .legend-item {
+    width: 48%;
+    display: inline-flex;
+  }
+
+  .pixel-input,
+  .pixel-button,
+  .forecast-day {
+    padding: 12px;
+  }
+
+  .weather-icon-display {
+    width: 30px;
+    height: 30px;
+  }
+
+  .scroll-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .city-view {
+    height: 250px;
+  }
+
+  .metric-item {
+    padding: 8px 5px;
+  }
+
+  .metric-label {
+    font-size: 7px;
+  }
+
+  .metric-value {
+    font-size: 16px;
+  }
+
+  .hour-item {
+    min-width: 60px;
+  }
+
+  .legend-item {
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  .section-title {
+    font-size: 10px;
+  }
+
+  .weather-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .forecast-day {
+    padding-bottom: 8px;
+  }
+
+  .day-name,
+  .day-temp {
+    font-size: 16px;
+  }
+}
+
+@media (pointer: coarse) {
+  .pixel-button,
+  .forecast-day,
+  .scroll-btn {
+    min-height: 44px;
+  }
+
+  .forecast-day {
+    padding: 10px;
+  }
+}
+
+@media (hover: none) {
+  .scroll-btn {
+    opacity: 1;
+  }
+
+  .hourly-forecast {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .hourly-forecast::-webkit-scrollbar {
+    display: none;
+  }
+}

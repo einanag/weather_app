@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const dynamicBg = document.getElementById("dynamic-bg");
 
   let fullForecastData = [];
+  let isMobile = window.innerWidth <= 768;
+  let touchStartX = 0;
+  let touchEndX = 0;
 
   const CONDITION_CODES = {
     CLEAR: [1000],
@@ -46,6 +49,76 @@ document.addEventListener("DOMContentLoaded", function () {
     FRI: "#f9e076",
   };
 
+  function checkDevice() {
+    isMobile =
+      window.innerWidth <= 768 ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0;
+
+    if (isMobile) {
+      setupMobileUI();
+    } else {
+      setupDesktopUI();
+    }
+  }
+
+  function setupMobileUI() {
+    citySearch.setAttribute("autocomplete", "off");
+    citySearch.setAttribute("autocorrect", "off");
+    citySearch.setAttribute("autocapitalize", "words");
+
+    const tapElements = document.querySelectorAll(
+      ".pixel-button, .forecast-day, .scroll-btn"
+    );
+    tapElements.forEach((el) => {
+      el.style.minHeight = "44px";
+    });
+
+    setupTouchScrolling();
+  }
+
+  function setupDesktopUI() {
+    const tapElements = document.querySelectorAll(
+      ".pixel-button, .forecast-day, .scroll-btn"
+    );
+    tapElements.forEach((el) => {
+      el.style.minHeight = "";
+    });
+  }
+
+  function setupTouchScrolling() {
+    const scrollContainer = document.querySelector(".hourly-forecast");
+
+    scrollContainer.addEventListener(
+      "touchstart",
+      function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+      },
+      { passive: true }
+    );
+
+    scrollContainer.addEventListener(
+      "touchend",
+      function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe(scrollContainer);
+      },
+      { passive: true }
+    );
+
+    scrollContainer.style.WebkitOverflowScrolling = "touch";
+  }
+
+  function handleSwipe(container) {
+    const swipeDistance = touchStartX - touchEndX;
+    if (Math.abs(swipeDistance) > 50) {
+      container.scrollBy({
+        left: swipeDistance,
+        behavior: "smooth",
+      });
+    }
+  }
+
   searchBtn.addEventListener("click", handleSearch);
   citySearch.addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
@@ -53,16 +126,61 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  window.addEventListener(
+    "resize",
+    debounce(function () {
+      checkDevice();
+      adjustLayoutForOrientation();
+    }, 250)
+  );
+
+  window.addEventListener("orientationchange", function () {
+    setTimeout(adjustLayoutForOrientation, 100);
+  });
+
+  function debounce(func, wait) {
+    let timeout;
+    return function () {
+      const context = this;
+      const args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+  }
+
+  function adjustLayoutForOrientation() {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    const weatherApp = document.querySelector(".weather-app");
+
+    if (isMobile && isLandscape) {
+      weatherApp.style.gridTemplateColumns = "1fr 1fr";
+      document.querySelector(".city-view").style.height = "250px";
+    } else if (isMobile) {
+      weatherApp.style.gridTemplateColumns = "1fr";
+      document.querySelector(".city-view").style.height = "300px";
+    } else {
+      weatherApp.style.gridTemplateColumns = "1fr 350px";
+      document.querySelector(".city-view").style.height = "500px";
+    }
+
+    repositionScrollButtons();
+  }
+
   function initApp() {
     updateClock();
     showLoading();
+    checkDevice();
+
     const savedLocation = localStorage.getItem("weatherLocation");
     if (savedLocation) {
       fetchWeatherByCity(savedLocation);
     } else {
       getUserLocation();
     }
+
     makeHourlyForecastScrollable();
+
+    setInterval(updateClock, 60000);
   }
 
   function makeHourlyForecastScrollable() {
@@ -74,12 +192,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const scrollRightBtn = document.createElement("button");
     scrollRightBtn.className = "scroll-btn scroll-right";
     scrollRightBtn.innerHTML = "▶";
+
     scrollLeftBtn.addEventListener("click", () => {
       scrollContainer.scrollBy({ left: -200, behavior: "smooth" });
     });
+
     scrollRightBtn.addEventListener("click", () => {
       scrollContainer.scrollBy({ left: 200, behavior: "smooth" });
     });
+
     scrollContainer.addEventListener("scroll", () => {
       if (scrollContainer.scrollLeft > 0) {
         scrollLeftBtn.style.display = "block";
@@ -88,21 +209,49 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       if (
         scrollContainer.scrollLeft + scrollContainer.clientWidth >=
-        scrollContainer.scrollWidth
+        scrollContainer.scrollWidth - 10
       ) {
         scrollRightBtn.style.display = "none";
       } else {
         scrollRightBtn.style.display = "block";
       }
     });
+
     const hourlyContainer = document.querySelector(
       ".hourly-forecast-container"
     );
     hourlyContainer.appendChild(scrollLeftBtn);
     hourlyContainer.appendChild(scrollRightBtn);
-    const style = document.createElement("style");
-    style.textContent = `.hourly-forecast-container{position:relative}.scroll-btn{position:absolute;top:50%;transform:translateY(-50%);background-color:var(--panel-dark);color:var(--text-light);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;opacity:0.8}.scroll-btn:hover{opacity:1}.scroll-left{left:5px}.scroll-right{right:5px}`;
-    document.head.appendChild(style);
+
+    if (!document.getElementById("scroll-styles")) {
+      const style = document.createElement("style");
+      style.id = "scroll-styles";
+      style.textContent = `.hourly-forecast-container{position:relative}.scroll-btn{position:absolute;top:50%;transform:translateY(-50%);background-color:var(--panel-dark);color:var(--text-light);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;opacity:0.8}.scroll-btn:hover{opacity:1}.scroll-left{left:5px}.scroll-right{right:5px}@media (hover: none){.scroll-btn{width:40px;height:40px;opacity:1}}`;
+      document.head.appendChild(style);
+    }
+
+    if (isMobile) {
+      const mobileScrollStyle = document.createElement("style");
+      mobileScrollStyle.textContent = `.hourly-forecast::-webkit-scrollbar{display:none}.hourly-forecast{scrollbar-width:none;-ms-overflow-style:none}`;
+      document.head.appendChild(mobileScrollStyle);
+    }
+
+    repositionScrollButtons();
+  }
+
+  function repositionScrollButtons() {
+    const scrollContainer = document.querySelector(".hourly-forecast");
+    const scrollLeftBtn = document.querySelector(".scroll-left");
+    const scrollRightBtn = document.querySelector(".scroll-right");
+
+    if (scrollContainer && scrollLeftBtn && scrollRightBtn) {
+      if (scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+        scrollRightBtn.style.display = "block";
+      } else {
+        scrollLeftBtn.style.display = "none";
+        scrollRightBtn.style.display = "none";
+      }
+    }
   }
 
   function updateClock() {
@@ -134,6 +283,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (city) {
       showLoading();
       fetchWeatherByCity(city);
+
+      if (isMobile) {
+        citySearch.blur();
+      }
     }
   }
 
@@ -148,7 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
           console.error("Error getting location:", error);
           handleLocationError(error);
         },
-        { timeout: 10000 }
+        { timeout: 15000, maximumAge: 60000 }
       );
     } else {
       showError("Geolocation is not supported by this browser.");
@@ -187,6 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function fetchWeatherByCoords(lat, lon) {
+    showNetworkActivity(true);
     fetch(
       `${WEATHER_API_BASE}/forecast.json?key=${API_KEY}&q=${lat},${lon}&days=5&aqi=yes`
     )
@@ -194,14 +348,17 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         updateWeatherUI(data);
         localStorage.setItem("weatherLocation", data.location.name);
+        showNetworkActivity(false);
       })
       .catch((error) => {
         console.error("Error fetching weather data:", error);
         showError("Failed to fetch weather data. Please try again.");
+        showNetworkActivity(false);
       });
   }
 
   function fetchWeatherByCity(city) {
+    showNetworkActivity(true);
     fetch(
       `${WEATHER_API_BASE}/forecast.json?key=${API_KEY}&q=${city}&days=5&aqi=yes`
     )
@@ -209,11 +366,29 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         updateWeatherUI(data);
         localStorage.setItem("weatherLocation", city);
+        showNetworkActivity(false);
       })
       .catch((error) => {
         console.error("Error fetching weather data:", error);
         showError("City not found or weather data unavailable.");
+        showNetworkActivity(false);
       });
+  }
+
+  function showNetworkActivity(isLoading) {
+    if (isLoading) {
+      document.body.style.cursor = "progress";
+      if (searchBtn) {
+        searchBtn.disabled = true;
+        searchBtn.style.opacity = "0.7";
+      }
+    } else {
+      document.body.style.cursor = "";
+      if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.style.opacity = "1";
+      }
+    }
   }
 
   function handleResponse(response) {
@@ -258,6 +433,8 @@ document.addEventListener("DOMContentLoaded", function () {
       updateForecast(data.forecast.forecastday);
       updateHourlyForecast(data.forecast.forecastday[0].hour, true);
       updateDynamicBackground(data.current.condition.code, data.current.is_day);
+
+      setTimeout(repositionScrollButtons, 100);
     } catch (error) {
       console.error("Error updating UI:", error);
       showError("Error displaying weather data.");
@@ -308,7 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
       dynamicBg.classList.add("bg-day");
     } else {
       dynamicBg.classList.add("bg-night");
-      addStars(weatherScene, 50);
+      addStars(weatherScene, isMobile ? 25 : 50);
     }
     if (CONDITION_CODES.CLEAR.includes(code)) {
       if (isDay) {
@@ -321,18 +498,18 @@ document.addEventListener("DOMContentLoaded", function () {
         weatherScene.appendChild(moon);
       }
     } else if (CONDITION_CODES.PARTLY_CLOUDY.includes(code)) {
-      addClouds(weatherScene, 2);
+      addClouds(weatherScene, isMobile ? 1 : 2);
       dynamicBg.classList.add("bg-cloudy");
     } else if (CONDITION_CODES.CLOUDY.includes(code)) {
-      addClouds(weatherScene, 4);
+      addClouds(weatherScene, isMobile ? 2 : 4);
       dynamicBg.classList.add("bg-cloudy");
     } else if (CONDITION_CODES.RAIN.includes(code)) {
-      addClouds(weatherScene, 3);
-      addRain(weatherScene, 40);
+      addClouds(weatherScene, isMobile ? 2 : 3);
+      addRain(weatherScene, isMobile ? 20 : 40);
       dynamicBg.classList.add("bg-rainy");
     } else if (CONDITION_CODES.SNOW.includes(code)) {
-      addClouds(weatherScene, 3);
-      addSnow(weatherScene, 30);
+      addClouds(weatherScene, isMobile ? 2 : 3);
+      addSnow(weatherScene, isMobile ? 15 : 30);
       dynamicBg.classList.add("bg-cloudy");
     }
   }
@@ -401,6 +578,23 @@ document.addEventListener("DOMContentLoaded", function () {
       forecastDay.addEventListener("click", () => {
         handleForecastDayClick(day, index);
       });
+
+      if (isMobile) {
+        forecastDay.addEventListener(
+          "touchstart",
+          function () {
+            this.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+          },
+          { passive: true }
+        );
+        forecastDay.addEventListener(
+          "touchend",
+          function () {
+            this.style.backgroundColor = "";
+          },
+          { passive: true }
+        );
+      }
       forecastDay.style.cursor = "pointer";
       const dayIcon = document.createElement("div");
       dayIcon.className = "day-icon";
@@ -438,7 +632,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleForecastDayClick(dayData, dayIndex) {
     if (dayData.hour && dayData.hour.length > 0) {
       const isToday = dayIndex === 0;
-      const isDay = dayData.hour[0].is_day === 1;
+      const isDay = dayData.hour[12].is_day === 1;
       updateHourlyForecast(dayData.hour, isToday);
       updateDynamicBackground(dayData.day.condition.code, isDay);
       const date = new Date(dayData.date);
@@ -451,7 +645,14 @@ document.addEventListener("DOMContentLoaded", function () {
         ".hourly-forecast-container .section-title"
       );
       hourlyTitle.textContent = `HOURLY FORECAST - ${formattedDate}`;
-      document.querySelector(".hourly-forecast-container").scrollIntoView({
+
+      const scrollTarget = document.querySelector(".hourly-forecast-container");
+      const yOffset = isMobile ? -10 : -20;
+      const y =
+        scrollTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({
+        top: y,
         behavior: "smooth",
       });
     }
@@ -478,6 +679,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (filteredHours.length === 0) {
       filteredHours = hourlyData;
     }
+
+    if (isMobile && filterCurrentHour) {
+      filteredHours = filteredHours.slice(0, 12);
+    }
+
     filteredHours.forEach((hour, index) => {
       const hourTime = new Date(hour.time);
       const displayHour = hourTime.getHours();
@@ -502,6 +708,8 @@ document.addEventListener("DOMContentLoaded", function () {
       hourItem.appendChild(tempElement);
       hourlyForecast.appendChild(hourItem);
     });
+
+    repositionScrollButtons();
   }
 
   initApp();
